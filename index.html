@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Valentine Quiz & Celebration</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #ffe6f0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  .hidden { display: none; }
+
+  .letter-container, .quiz-container, #celebrationPage {
+    background: rgba(255,255,255,0.95);
+    padding: 30px 20px;
+    border-radius: 15px;
+    text-align: center;
+    z-index: 10;
+    position: relative;
+    max-width: 90%;
+  }
+
+  h1 { color:#e91e63; margin-bottom:15px; font-size: 20px; }
+  p { font-size:16px; line-height:1.5; color:#b30059; }
+
+  button {
+    margin-top:20px;
+    background:#ff99cc;
+    border:none;
+    padding:8px 20px;
+    border-radius:10px;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+  }
+
+  button:hover {
+    background:#ff66aa;
+    transform:scale(1.05);
+  }
+
+  .quiz-btn {
+    background:#ff99cc;
+    border:none;
+    padding:8px 16px;
+    margin:5px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:0.3s;
+  }
+
+  .quiz-btn:hover {
+    background:#ff66aa;
+    transform:scale(1.05);
+  }
+
+  canvas {
+    position:absolute;
+    top:0;
+    left:0;
+    pointer-events:none;
+    z-index:5;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- Letter Page -->
+<div class="letter-container" id="letterScreen">
+  <h1>💌 A Special Message 💌</h1>
+  <p>
+    Roses are red, violets are blue,<br>
+    This little quiz is just for you!<br>
+    Click enter and let's see,<br>
+    How much love surrounds thee! 💖</p>
+  <button id="enterBtn">Enter</button>
+</div>
+
+<!-- Quiz Page -->
+<div class="quiz-container hidden" id="quizContainer">
+  <h1>💖 Valentine Quiz 💖</h1>
+  <div id="questionContainer"></div>
+</div>
+
+<!-- Quiz Page -->
+<div class="quiz-container hidden" id="quizContainer">
+  <h1>💖 Valentine Quiz 💖</h1>
+  <div id="questionContainer"></div>
+</div>
+
+<!-- Celebration Page -->
+<div class="hidden" id="celebrationPage" style="position:relative; width:100%; height:100vh; overflow:hidden;">
+  <h1 id="celebrationText">💖 Bujji Pelham! 💖</h1>
+  <ul id="celebrationSubText">
+<ul style="list-style-type: none; margin: 0; padding: 0;">
+    <li>💖 Happy Valentines Day Kanna </li>
+   
+    <li>💖 Nanna nuv natho lifelong unte chalu nanna</li>
+    
+    <li>🌹 Kanna idhi na life lonee first valentine kanna</li>
+   
+    <li>🍫 Enni kastalu vochina ila ne strong gaa undam kanna </li>
+    
+    <li>✨ I Love You so much bujji kanna !</li>
+    
+    <li>✨ Ninnu sachina mosam cheyanu nanna </li>
+    </ul> 
+  </ul>
+  
+  <canvas id="celebrationCanvas"></canvas>
+</div>
+
+<style>
+  /* Main full-screen heading */
+  #celebrationText {
+    ul li {
+    margin-bottom: 10px; /* space between list items */
+}
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #E75480;
+    font-size: 4vw; /* Responsive font size */
+    text-align: center;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  /* Subtext below the main heading */
+  #celebrationSubText {
+    position: absolute;
+    top: 35%; /* Adjust vertical position below heading */
+    left: 45%;
+    transform: translateX(-50%);
+    color: #CA226B;
+    font-size: 8vw; /* Smaller than heading */
+    text-align: center;
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  /* Optional: smaller screens */
+  @media (max-width: 400px){
+    #celebrationText { font-size: 10vw; }
+    #celebrationSubText { font-size: 4vw; }
+  }
+</style>
+
+
+<audio id="clickSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+<canvas id="heartsCanvas"></canvas>
+
+<script>
+const letterScreen = document.getElementById('letterScreen');
+const quizContainer = document.getElementById('quizContainer');
+const celebrationPage = document.getElementById('celebrationPage');
+const enterBtn = document.getElementById('enterBtn');
+const clickSound = document.getElementById('clickSound');
+
+enterBtn.addEventListener('click', () => {
+  letterScreen.classList.add('hidden');
+  quizContainer.classList.remove('hidden');
+});
+
+// ---------------- Quiz ----------------
+const questions = [
+  "Are you really happy with me❤️",
+  "So naku 1000 kisses istava?",
+  "Niku brain ledu kada?",
+  "Natho lifelong untav kada?",
+  "Can we be my swan?",
+  "Can bunny can play with lilly?",
+  "Can you be my Valentine?",
+"Lilly ki bunny ante pranam kada?",
+"Niku egg rice ante istam kada?",
+"Last question nanna...",
+  "Would you like to marry me?"
+];
+
+
+const questionContainer = document.getElementById('questionContainer');
+let currentQuestion = 0;
+
+function showQuestion(index) {
+  if (index >= questions.length) {
+    quizContainer.classList.add('hidden');
+    celebrationPage.classList.remove('hidden');
+    startCelebration();
+    return;
+  }
+
+  questionContainer.innerHTML = `
+    <div class="question">${questions[index]}</div>
+    <div style="position:relative;height:120px;">
+      <button class="quiz-btn" onclick="answer()">Yes</button>
+      <button class="quiz-btn" id="noBtn">No</button>
+    </div>
+  `;
+
+  moveNoButton();
+}
+
+function answer() {
+  clickSound.play();
+  currentQuestion++;
+  showQuestion(currentQuestion);
+}
+
+// ---------------- Moving NO Button ----------------
+function moveNoButton() {
+  const noBtn = document.getElementById('noBtn');
+  if (!noBtn) return;
+
+  noBtn.style.position = "absolute";
+
+  function move() {
+    const parent = noBtn.parentElement;
+    const maxX = parent.offsetWidth - noBtn.offsetWidth;
+    const maxY = parent.offsetHeight - noBtn.offsetHeight;
+
+    noBtn.style.left = Math.random() * maxX + "px";
+    noBtn.style.top = Math.random() * maxY + "px";
+  }
+
+  noBtn.addEventListener("mouseenter", move);
+  noBtn.addEventListener("click", move);
+}
+
+showQuestion(currentQuestion);
+
+// ---------------- Slow Floating Hearts ----------------
+const heartsCanvas = document.getElementById('heartsCanvas');
+const heartsCtx = heartsCanvas.getContext('2d');
+
+function resizeCanvas(canvas){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+resizeCanvas(heartsCanvas);
+window.addEventListener('resize', () => resizeCanvas(heartsCanvas));
+
+class Heart {
+  constructor(){
+    this.x = Math.random()*window.innerWidth;
+    this.y = Math.random()*window.innerHeight;
+    this.size = 8 + Math.random()*12;
+    this.speedX = (Math.random()-0.5)*0.3;
+    this.speedY = (Math.random()-0.5)*0.3;
+    this.color = `#ff4da6`;
+  }
+  draw(){
+    heartsCtx.fillStyle = this.color;
+    heartsCtx.beginPath();
+    heartsCtx.moveTo(this.x, this.y);
+    heartsCtx.bezierCurveTo(this.x, this.y-2, this.x-3, this.y-6, this.x-6, this.y-6);
+    heartsCtx.bezierCurveTo(this.x-15, this.y-6, this.x-15, this.y+6, this.x-15, this.y+6);
+    heartsCtx.bezierCurveTo(this.x-15, this.y+12, this.x-6, this.y+15, this.x, this.y+20);
+    heartsCtx.bezierCurveTo(this.x+6, this.y+15, this.x+15, this.y+12, this.x+15, this.y+6);
+    heartsCtx.bezierCurveTo(this.x+15, this.y+6, this.x+15, this.y-6, this.x+6, this.y-6);
+    heartsCtx.bezierCurveTo(this.x+3, this.y-6, this.x, this.y-2, this.x, this.y);
+    heartsCtx.fill();
+  }
+  update(){
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if(this.x < -20) this.x = window.innerWidth+20;
+    if(this.x > window.innerWidth+20) this.x = -20;
+    if(this.y < -20) this.y = window.innerHeight+20;
+    if(this.y > window.innerHeight+20) this.y = -20;
+  }
+}
+
+const heartsArray = [];
+for(let i=0;i<20;i++) heartsArray.push(new Heart());
+
+function animateHearts(){
+  heartsCtx.clearRect(0,0,heartsCanvas.width,heartsCanvas.height);
+  heartsArray.forEach(h=>{
+    h.update();
+    h.draw();
+  });
+  requestAnimationFrame(animateHearts);
+}
+animateHearts();
+
+// ---------------- Celebration: Fireworks + Confetti + Glow ----------------
+const canvas = document.getElementById('celebrationCanvas');
+const ctx = canvas.getContext('2d');
+
+resizeCanvas(canvas);
+
+class Particle {
+  constructor(x,y,color,size=3,speedX=0,speedY=0,gravity=0.02,alpha=1){
+    this.x = x; this.y = y;
+    this.color = color; this.size = size;
+    this.speedX = speedX; this.speedY = speedY;
+    this.gravity = gravity; this.alpha = alpha;
+  }
+  update(){ this.speedY += this.gravity; this.x += this.speedX; this.y += this.speedY; this.alpha -= 0.008; }
+  drawHeart(ctx){
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    let x = this.x, y = this.y;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x, y-2, x-3, y-6, x-6, y-6);
+    ctx.bezierCurveTo(x-15, y-6, x-15, y+6, x-15, y+6);
+    ctx.bezierCurveTo(x-15, y+12, x-6, y+15, x, y+20);
+    ctx.bezierCurveTo(x+6, y+15, x+15, y+12, x+15, y+6);
+    ctx.bezierCurveTo(x+15, y+6, x+15, y-6, x+6, y-6);
+    ctx.bezierCurveTo(x+3, y-6, x, y-2, x, y);
+    ctx.fill();
+    ctx.restore();
+  }
+  drawCircle(ctx){ ctx.save(); ctx.globalAlpha=this.alpha; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+}
+
+let particles = [];
+
+function startCelebration(){
+  setInterval(()=>{
+    const colors = ['#ff4da6','#ff66cc','#ff99cc','#ff1a75','#ff80bf'];
+    for(let i=0;i<3;i++){
+      const x = Math.random()*canvas.width;
+      const y = Math.random()*canvas.height/2;
+      const color = colors[Math.floor(Math.random()*colors.length)];
+      // heart fireworks
+      for(let j=0;j<15;j++){
+        const speedX = (Math.random()-0.5)*5;
+        const speedY = (Math.random()-0.5)*5;
+        particles.push(new Particle(x,y,color,3,speedX,speedY));
+      }
+      // confetti
+      for(let k=0;k<10;k++){
+        const confX = Math.random()*canvas.width;
+        const confY = -5;
+        const confColor = colors[Math.floor(Math.random()*colors.length)];
+        const confSpeedX = (Math.random()-0.5)*1;
+        const confSpeedY = 1 + Math.random()*2;
+        particles.push(new Particle(confX,confY,confColor,2,confSpeedX,confSpeedY,0,0.8));
+      }
+      // tiny glow particles
+      for(let t=0;t<10;t++){
+        const glowX = Math.random()*canvas.width;
+        const glowY = Math.random()*canvas.height;
+        particles.push(new Particle(glowX,glowY,'#fff',1,0,0,0,0.5+Math.random()*0.5));
+      }
+    }
+  },400);
+  animateCelebration();
+}
+
+function animateCelebration(){
+  ctx.fillStyle = "rgba(255,230,240,0.2)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=particles.length-1;i>=0;i--){
+    particles[i].update();
+    if(particles[i].size <= 3) particles[i].drawHeart(ctx);
+    else particles[i].drawCircle(ctx);
+    if(particles[i].alpha <=0) particles.splice(i,1);
+  }
+  requestAnimationFrame(animateCelebration);
+}
+</script>
+
+</body>
+</html>
